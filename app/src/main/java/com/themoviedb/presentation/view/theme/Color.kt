@@ -1,4 +1,4 @@
-package com.themoviedb.ui.theme
+package com.themoviedb.presentation.view.theme
 
 import androidx.compose.ui.graphics.Color
 

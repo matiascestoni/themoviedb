@@ -1,4 +1,4 @@
-package com.themoviedb.ui.theme
+package com.themoviedb.presentation.view.theme
 
 import android.app.Activity
 import android.os.Build
