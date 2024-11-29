@@ -1,14 +1,14 @@
 package com.themoviedb.domain.repository
 
 import com.themoviedb.common.Response
-import com.themoviedb.domain.model.Movie
 import com.themoviedb.domain.model.MovieDetail
+import com.themoviedb.domain.model.MovieResponse
 
 interface MovieRepository {
 
-    suspend fun fetchCarouselMovies(): Response<List<Movie>>
+    suspend fun fetchPopularMovies(page: Int): Response<MovieResponse>
 
-    suspend fun fetchMoviesByCategory(category: String): Response<List<Movie>>
+    suspend fun fetchMoviesByCategory(category: String): Response<MovieResponse>
 
-    suspend fun fetchMovieDetails(movieId: Int): Response<MovieDetail>
+    suspend fun fetchMovieDetails(movieId: Int): Response<MovieDetail?>
 }
