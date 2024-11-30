@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -72,6 +73,7 @@ dependencies {
     implementation(libs.converter.gson)
     // OkHttp
     implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
     // Gson
     implementation(libs.gson)
     //Hilt

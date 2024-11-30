@@ -3,17 +3,20 @@ package com.themoviedb.data.repository
 import com.themoviedb.common.Response
 import com.themoviedb.data.local.LocalDataSource
 import com.themoviedb.data.remote.api.MovieApiService
+import com.themoviedb.domain.model.Movie
 import com.themoviedb.domain.model.MovieDetail
 import com.themoviedb.domain.model.MovieResponse
 import com.themoviedb.domain.repository.MovieRepository
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class MovieRepositoryImpl(
+class MovieRepositoryImpl @Inject constructor(
     private val apiService: MovieApiService,
     private val localDataSource: LocalDataSource
 ) : MovieRepository {
 
-    private val cacheExpirationTime = TimeUnit.HOURS.toMillis(3000)
+    private val cacheExpirationTime = TimeUnit.MINUTES.toMillis(1)
 
     private fun isDataFresh(lastUpdateTime: Long?): Boolean {
         return lastUpdateTime != null && (System.currentTimeMillis() - lastUpdateTime) < cacheExpirationTime
@@ -30,13 +33,13 @@ class MovieRepositoryImpl(
                 Response.Success(localMovies)
             } else {
                 // Fetch from remote if data is stale or unavailable locally
-                val remoteMovies = apiService.getPopularMovies(page)
+                val remoteMovies = apiService.getPopularMovies("en-US", page)
                 localDataSource.savePopularMovies(remoteMovies, page)
                 localDataSource.updateLastUpdateTime(System.currentTimeMillis())
                 Response.Success(remoteMovies)
             }
         } catch (networkError: Exception) {
-            //Timber.e(networkError, "Network error, attempting to use local data.")
+            Timber.e(networkError, "Network error, attempting to use local data.")
 
             // Fallback to local data if network request fails
             val localMovies = localDataSource.fetchPopularMovies(page)
@@ -48,32 +51,23 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun fetchMoviesByCategory(category: String): Response<MovieResponse> {
+    override suspend fun fetchPopularMovies(): List<Movie> {
+        val movieResponse = mutableListOf<Movie>()
+        for (page in 1..3) {
+            val response = fetchPopularMovies(page)
+            if (response is Response.Success) {
+                movieResponse.addAll(response.result.results as Collection<Movie>)
+            }
+        }
+        return movieResponse
+    }
+
+    override suspend fun fetchMoviesByCategory(category: String): List<Movie> {
         return try {
-            // Attempt to load local data
-            val localMovies = localDataSource.fetchMoviesByCategory(category)
-            val lastUpdateTime = localDataSource.getCategoryLastUpdateTime(category)
-
-            // Check if data is fresh
-            if (localMovies != null && isDataFresh(lastUpdateTime)) {
-                Response.Success(localMovies)
-            } else {
-                // Fetch from remote if data is stale or unavailable locally
-                val remoteMovies = apiService.getMoviesByCategory(category)
-                localDataSource.saveMoviesByCategory(remoteMovies, category)
-                localDataSource.updateCategoryLastUpdateTime(category, System.currentTimeMillis())
-                Response.Success(remoteMovies)
-            }
-        } catch (networkError: Exception) {
-            //Timber.e(networkError, "Network error, attempting to use local data.")
-
-            // Fallback to local data if network request fails
-            val localMovies = localDataSource.fetchMoviesByCategory(category)
-            if (localMovies != null) {
-                Response.Success(localMovies)
-            } else {
-                Response.Error("Failed to fetch movies for category: $category. ${networkError.message}")
-            }
+            localDataSource.fetchMoviesByCategory(category)
+        } catch (e: Exception) {
+            Timber.e("Failed to fetch movies by category: ${e.message}")
+            return emptyList()
         }
     }
 
@@ -88,14 +82,14 @@ class MovieRepositoryImpl(
                 Response.Success(localMovieDetail)
             } else {
                 // Fetch from remote if details are stale or unavailable locally
-                val remoteMovieDetail = apiService.getMovieDetails(movieId)
+                val remoteMovieDetail = apiService.getMovieDetails(movieId, "en-US")
                 remoteMovieDetail?.let {
                     localDataSource.saveMovieDetails(remoteMovieDetail)
                 }
                 Response.Success(remoteMovieDetail)
             }
         } catch (networkError: Exception) {
-            //Timber.e(networkError, "Network error, attempting to use local data.")
+            Timber.e(networkError, "Network error, attempting to use local data.")
 
             // Fallback to local data if network request fails
             val localMovieDetail = localDataSource.fetchMovieDetails(movieId)
@@ -105,5 +99,9 @@ class MovieRepositoryImpl(
                 Response.Error("Failed to fetch details for movie ID: $movieId. ${networkError.message}")
             }
         }
+    }
+
+    override suspend fun fetchTopPopularMovies(limit: Int): List<Movie> {
+        return localDataSource.fetchTopPopularMovies(limit)
     }
 }
