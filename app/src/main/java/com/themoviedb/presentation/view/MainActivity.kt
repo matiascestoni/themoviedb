@@ -26,9 +26,8 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var repository: MovieRepositoryImpl
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+    override fun onResume() {
+        super.onResume()
         lifecycleScope.launch {
             val movies = repository.fetchPopularMovies()
             movies.size
@@ -41,9 +40,12 @@ class MainActivity : ComponentActivity() {
                     res.result
                 }
             }
-
-
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             TheMovieDBTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

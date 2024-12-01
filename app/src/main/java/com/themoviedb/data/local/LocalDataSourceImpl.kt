@@ -1,48 +1,60 @@
 package com.themoviedb.data.local
 
+import com.themoviedb.data.local.dao.AppStateDao
+import com.themoviedb.data.local.dao.MovieDao
+import com.themoviedb.data.local.dao.MovieDetailDao
+import com.themoviedb.data.local.mapper.toEntity
+import com.themoviedb.data.local.mapper.toModel
+import com.themoviedb.data.local.mapper.toMovie
+import com.themoviedb.data.local.model.AppStateEntity
 import com.themoviedb.domain.model.Movie
 import com.themoviedb.domain.model.MovieDetail
-import com.themoviedb.domain.model.MovieResponse
 import javax.inject.Inject
 
-class LocalDataSourceImpl @Inject constructor() : LocalDataSource {
-    override suspend fun fetchPopularMovies(page: Int): MovieResponse? {
-        return null
+class LocalDataSourceImpl @Inject constructor(
+    private val movieDao: MovieDao,
+    private val movieDetailsDao: MovieDetailDao,
+    private val appStateDao: AppStateDao
+) : LocalDataSource {
+
+    override suspend fun fetchPopularMovies(page: Int): List<Movie> {
+        return movieDao.fetchPopularMovies(page).map { it.toMovie() }
     }
 
-    override suspend fun savePopularMovies(response: MovieResponse, page: Int) {
-        //TODO
+    override suspend fun savePopularMovies(movies: List<Movie>, page: Int) {
+        movieDao.saveMovies(movies.map { it.toEntity(page) })
     }
 
     override suspend fun getLastUpdateTime(): Long? {
-        return null
+        return appStateDao.getLastUpdateTime()
     }
 
     override suspend fun updateLastUpdateTime(timestamp: Long) {
-        //TODO
+        appStateDao.updateLastUpdateTime(AppStateEntity(0, timestamp))
     }
 
-    override suspend fun fetchMoviesByCategory(category: String): List<Movie> {
-        return emptyList()
-    }
-
-    override suspend fun saveMoviesByCategory(response: MovieResponse, category: String) {
-
+    override suspend fun fetchMoviesByGenre(genreId: Int): List<Movie> {
+        val movieEntities = movieDao.fetchMoviesByGenre(genreId)
+        return movieEntities.map { it.toMovie() }
     }
 
     override suspend fun fetchMovieDetails(movieId: Int): MovieDetail? {
-        return null
+        val movieDetailEntity = movieDetailsDao.getMovieDetails(movieId)
+        return movieDetailEntity?.toModel()
     }
 
     override suspend fun saveMovieDetails(detail: MovieDetail) {
-
-    }
-
-    override suspend fun getMoviesByGenre(id: Int): List<Movie> {
-        return emptyList()
+        movieDetailsDao.insertMovieDetail(detail.toEntity())
     }
 
     override suspend fun fetchTopPopularMovies(limit: Int): List<Movie> {
-        return emptyList()
+        val movieEntities = movieDao.fetchTopPopularMovies(limit)
+        return movieEntities.map { it.toMovie() }
+    }
+
+    override suspend fun clearMovies() {
+        movieDao.clear()
+        movieDetailsDao.clear()
+        appStateDao.clear()
     }
 }

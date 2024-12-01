@@ -1,10 +1,14 @@
-package com.themoviedb.domain.model
+package com.themoviedb.data.local.model
 
-data class Movie(
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "movies")
+data class MovieEntity(
     val adult: Boolean? = null,
     val backdropPath: String? = null,
-    val genreIds: List<Int?>? = null,
-    val id: Int? = null,
+    val genreIds: String? = null,
+    @PrimaryKey val id: Int,
     val originalLanguage: String? = null,
     val originalTitle: String? = null,
     val overview: String? = null,
@@ -15,5 +19,6 @@ data class Movie(
     val video: Boolean? = null,
     val voteAverage: Double? = null,
     val voteCount: Int? = null,
-    val page: Int? = null
+    val page: Int? = null, // Page number for pagination
+    val timestamp: Long? = null // Timestamp for freshness
 )
