@@ -5,6 +5,7 @@ import com.themoviedb.data.local.LocalDataSource
 import com.themoviedb.data.remote.api.MovieApiService
 import com.themoviedb.domain.model.Movie
 import com.themoviedb.domain.model.MovieDetail
+import com.themoviedb.domain.model.MovieGenre
 import com.themoviedb.domain.repository.MovieRepository
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -48,18 +49,29 @@ class MovieRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun fetchPopularMovies(): List<Movie> {
-        val movieResponse = mutableListOf<Movie>()
+    override suspend fun fetchPopularMovies(): Response<List<Movie>> {
+        val movies = mutableListOf<Movie>()
         for (page in 1..3) {
             val response = fetchPopularMovies(page)
             if (response is Response.Success) {
-                movieResponse.addAll(response.result as Collection<Movie>)
+                movies.addAll(response.result as Collection<Movie>)
+            } else {
+                return Response.Error("Error getting movies")
             }
         }
-        return movieResponse
+        return Response.Success(movies)
     }
 
-    override suspend fun fetchMoviesByCategory(genreId: Int): List<Movie> {
+    override suspend fun fetchMoviesByGenre(): Map<String, List<Movie>> {
+        val map = mutableMapOf<String, List<Movie>>()
+        for (genre in MovieGenre.entries) {
+            val movies = localDataSource.fetchMoviesByGenre(genre.id)
+            map[genre.genreName] = movies
+        }
+        return map
+    }
+
+    override suspend fun fetchMoviesByGenre(genreId: Int): List<Movie> {
         return try {
             localDataSource.fetchMoviesByGenre(genreId)
         } catch (e: Exception) {
