@@ -27,6 +27,8 @@ class HomeViewModel @Inject constructor(
     private val _navigation = MutableStateFlow<HomeNavigation?>(null)
     val navigation: StateFlow<HomeNavigation?> = _navigation
 
+    private var currentPage = 3
+
     fun onMovieSelected(movieId: Int) {
         _navigation.value = HomeNavigation.ToMovieDetail(movieId)
     }
@@ -40,6 +42,22 @@ class HomeViewModel @Inject constructor(
             is Response.Error -> _uiState.value = HomeUIState.Error(response.message)
             is Response.Success -> {
                 val carouselMovies = response.result.take(5).map { it.toMovieUIItem() }
+                val movieByGenreMap = repository.fetchMoviesByGenre()
+                val movieUIItemByGenreMap = movieByGenreMap.mapValues { (_, movies) ->
+                    movies.map { it.toMovieUIItem() }
+                }
+                _uiState.value = HomeUIState.Success(carouselMovies, movieUIItemByGenreMap)
+            }
+        }
+    }
+
+    fun onRefresh() = viewModelScope.launch {
+        _uiState.value = HomeUIState.Loading
+        currentPage++
+        when (val response = repository.fetchPopularMovies(currentPage)) {
+            is Response.Error -> _uiState.value = HomeUIState.Error(response.message)
+            is Response.Success -> {
+                val carouselMovies = repository.fetchTopPopularMovies(5).map { it.toMovieUIItem() }
                 val movieByGenreMap = repository.fetchMoviesByGenre()
                 val movieUIItemByGenreMap = movieByGenreMap.mapValues { (_, movies) ->
                     movies.map { it.toMovieUIItem() }

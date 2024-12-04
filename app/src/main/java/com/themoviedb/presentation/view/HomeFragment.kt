@@ -67,6 +67,9 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
             adapter = genreAdapter
             layoutManager = LinearLayoutManager(context)
         }
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.onRefresh()
+        }
     }
 
     private fun handleUIState(uiState: HomeUIState) {
@@ -105,10 +108,12 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
 
     private fun showLoading() {
         binding.progressBar.visibility = View.VISIBLE
+        binding.swipeRefreshLayout.isRefreshing = true
     }
 
     private fun hideLoading() {
         binding.progressBar.visibility = View.GONE
+        binding.swipeRefreshLayout.isRefreshing = false
     }
 
     private fun navigateToMovieDetail(movieId: Int) {
