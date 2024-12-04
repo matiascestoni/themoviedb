@@ -11,8 +11,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.themoviedb.R
 import com.themoviedb.databinding.FragmentDetailMovieBinding
+import com.themoviedb.domain.model.ImageUrlProvider
 import com.themoviedb.domain.model.MovieDetail
 import com.themoviedb.presentation.model.MovieDetailNavigation
 import com.themoviedb.presentation.model.MovieDetailUIState
@@ -73,7 +76,44 @@ class MovieDetailFragment : Fragment() {
     }
 
     private fun handleSuccess(movieDetail: MovieDetail) {
-        binding.title.text = movieDetail.title
+        movieDetail.backdropPath?.let {
+            Glide.with(binding.root.context)
+                .load(ImageUrlProvider.getPosterImageUrl(it))
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.sample_poster)
+                .error(R.drawable.error_image)
+                .into(binding.backdropImage)
+        }
+
+        binding.titleText.text = movieDetail.title ?: "Unknown Title"
+        binding.taglineText.text = movieDetail.tagline ?: ""
+        binding.overviewText.text = movieDetail.overview ?: ""
+        binding.releaseDateText.text =
+            getString(R.string.release_date, movieDetail.releaseDate ?: "Unknown")
+        binding.genresText.text =
+            getString(
+                R.string.genres,
+                movieDetail.genres?.joinToString(", ") { it?.name ?: "" } ?: "N/A")
+        binding.runtimeText.text =
+            getString(R.string.runtime, movieDetail.runtime?.let { "$it min" } ?: "N/A")
+        binding.voteAverageText.text = getString(R.string.rating, movieDetail.voteAverage ?: "N/A")
+        binding.budgetText.text =
+            getString(R.string.budget, movieDetail.budget?.let { "$$it" } ?: "N/A")
+        binding.revenueText.text =
+            getString(R.string.revenue, movieDetail.revenue?.let { "$$it" } ?: "N/A")
+        binding.statusText.text = getString(R.string.status, movieDetail.status ?: "N/A")
+        binding.spokenLanguagesText.text =
+            getString(
+                R.string.languages,
+                movieDetail.spokenLanguages?.joinToString(", ") { it?.name ?: "" } ?: "N/A")
+        binding.productionCompaniesText.text =
+            getString(
+                R.string.production_companies,
+                movieDetail.productionCompanies?.joinToString(", ") { it?.name ?: "" } ?: "N/A")
+        binding.productionCountriesText.text =
+            getString(
+                R.string.production_countries,
+                movieDetail.productionCountries?.joinToString(", ") { it?.name ?: "" } ?: "N/A")
     }
 
     private fun navigateToHome() {

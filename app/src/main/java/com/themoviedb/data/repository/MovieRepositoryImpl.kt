@@ -42,7 +42,7 @@ class MovieRepositoryImpl @Inject constructor(
             Timber.e(networkError, "Network error, attempting to use local data.")
             // Fallback to local data if network request fails
             val localMovies = localDataSource.fetchPopularMovies(page)
-            Response.Success(localMovies)
+            Response.Success(localMovies, isOffline = true)
         } catch (e: Exception) {
             Timber.e("Failed to fetch popular movies: ${e.message}")
             Response.Error("Failed to fetch popular movies: ${e.message}")
@@ -51,15 +51,17 @@ class MovieRepositoryImpl @Inject constructor(
 
     override suspend fun fetchPopularMovies(): Response<List<Movie>> {
         val movies = mutableListOf<Movie>()
+        var isOffline = false
         for (page in 1..3) {
             val response = fetchPopularMovies(page)
             if (response is Response.Success) {
+                isOffline = response.isOffline
                 movies.addAll(response.result as Collection<Movie>)
             } else {
                 return Response.Error("Error getting movies")
             }
         }
-        return Response.Success(movies)
+        return Response.Success(movies, isOffline)
     }
 
     override suspend fun fetchMoviesByGenre(): Map<String, List<Movie>> {
@@ -103,7 +105,7 @@ class MovieRepositoryImpl @Inject constructor(
             // Fallback to local data if network request fails
             val localMovieDetail = localDataSource.fetchMovieDetails(movieId)
             if (localMovieDetail != null) {
-                Response.Success(localMovieDetail)
+                Response.Success(localMovieDetail, isOffline = true)
             } else {
                 Response.Error("Failed to fetch details for movie ID: $movieId. ${networkError.message}")
             }
