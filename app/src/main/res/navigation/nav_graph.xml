@@ -10,6 +10,9 @@
         android:name="com.themoviedb.presentation.view.HomeFragment"
         tools:layout="@layout/fragment_home">
 
+        <action
+            android:id="@+id/action_HomeFragment_to_MovieDetailFragment"
+            app:destination="@id/movie_detail" />
     </fragment>
 
     <fragment
@@ -17,11 +20,15 @@
         android:name="com.themoviedb.presentation.view.MovieDetailFragment"
         tools:layout="@layout/fragment_detail_movie">
 
-        <action
-            android:id="@+id/action_HomeFragment_to_MovieDetailFragment"
-            app:destination="@id/movie_detail">
-
-        </action>
+        <argument
+            android:name="movieId"
+            app:argType="string" />
     </fragment>
+
+    <action
+        android:id="@+id/action_MovieDetailFragment_to_HomeFragment"
+        app:destination="@id/home"
+        app:popUpTo="@id/home"
+        app:popUpToInclusive="true" />
 
 </navigation>

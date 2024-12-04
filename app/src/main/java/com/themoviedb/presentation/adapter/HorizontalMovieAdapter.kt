@@ -11,8 +11,9 @@ import com.themoviedb.databinding.ItemMovieUiBinding
 import com.themoviedb.domain.model.ImageUrlProvider
 import com.themoviedb.presentation.model.MovieDiffCallback
 import com.themoviedb.presentation.model.MovieUIItem
+import com.themoviedb.presentation.view.OnMovieSelectedListener
 
-class HorizontalMovieAdapter :
+class HorizontalMovieAdapter(private val listener: OnMovieSelectedListener) :
     ListAdapter<MovieUIItem, HorizontalMovieAdapter.MovieViewHolder>(MovieDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
@@ -35,6 +36,10 @@ class HorizontalMovieAdapter :
                 .placeholder(R.drawable.sample_poster)
                 .error(R.drawable.error_image)
                 .into(binding.movieImage)
+
+            binding.root.setOnClickListener {
+                item.id?.let { listener.onMovieSelected(it) }
+            }
         }
     }
 }

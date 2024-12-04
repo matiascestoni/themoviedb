@@ -5,8 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.themoviedb.databinding.ItemGenreSectionBinding
 import com.themoviedb.presentation.model.MovieUIItem
+import com.themoviedb.presentation.view.OnMovieSelectedListener
 
-class GenreAdapter : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
+class GenreAdapter(private val listener: OnMovieSelectedListener) : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
 
     private var data: Map<String, List<MovieUIItem>> = emptyMap()
 
@@ -34,7 +35,7 @@ class GenreAdapter : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
 
         fun bind(genre: String, movies: List<MovieUIItem>) {
             binding.genreTitle.text = genre
-            val movieAdapter = HorizontalMovieAdapter()
+            val movieAdapter = HorizontalMovieAdapter(listener)
             binding.moviesList.adapter = movieAdapter
             movieAdapter.submitList(movies)
         }

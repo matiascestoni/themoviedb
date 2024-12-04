@@ -11,10 +11,21 @@ import com.themoviedb.databinding.ItemCarouselBinding
 import com.themoviedb.domain.model.ImageUrlProvider
 import com.themoviedb.presentation.model.MovieDiffCallback
 import com.themoviedb.presentation.model.MovieUIItem
+import com.themoviedb.presentation.view.OnMovieSelectedListener
 
-class CarouselAdapter : ListAdapter<MovieUIItem, CarouselAdapter.CarouselViewHolder>(
-    MovieDiffCallback()
-) {
+class CarouselAdapter(private val listener: OnMovieSelectedListener) :
+    ListAdapter<MovieUIItem, CarouselAdapter.CarouselViewHolder>(
+        MovieDiffCallback()
+    ) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarouselViewHolder {
+        val binding =
+            ItemCarouselBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CarouselViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: CarouselViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
 
     inner class CarouselViewHolder(private val binding: ItemCarouselBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -26,16 +37,10 @@ class CarouselAdapter : ListAdapter<MovieUIItem, CarouselAdapter.CarouselViewHol
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .error(R.drawable.error_image)
                 .into(binding.movieImage)
+
+            binding.root.setOnClickListener {
+                item.id?.let { listener.onMovieSelected(it) }
+            }
         }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarouselViewHolder {
-        val binding =
-            ItemCarouselBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return CarouselViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: CarouselViewHolder, position: Int) {
-        holder.bind(getItem(position))
     }
 }

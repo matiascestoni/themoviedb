@@ -7,4 +7,5 @@ sealed class HomeUIState {
         val carouselMovies: List<MovieUIItem>,
         val moviesByGenreMap: Map<String, List<MovieUIItem>>
     ) : HomeUIState()
+    data object IsOffline : HomeUIState()
 }

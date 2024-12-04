@@ -8,6 +8,7 @@ import com.themoviedb.presentation.mapper.toMovieUIItem
 import com.themoviedb.presentation.model.HomeNavigation
 import com.themoviedb.presentation.model.HomeUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -30,13 +31,13 @@ class HomeViewModel @Inject constructor(
         _navigation.value = HomeNavigation.ToMovieDetail(movieId)
     }
 
-    fun onNavigationHandled() {
+    fun onNavigationHandled() = viewModelScope.launch {
         _navigation.value = null
     }
 
     fun init() = viewModelScope.launch {
         when (val response = repository.fetchPopularMovies()) {
-            is Response.Error -> TODO()
+            is Response.Error -> _uiState.value = HomeUIState.Error(response.message)
             is Response.Success -> {
                 val carouselMovies = response.result.take(5).map { it.toMovieUIItem() }
                 val movieByGenreMap = repository.fetchMoviesByGenre()
