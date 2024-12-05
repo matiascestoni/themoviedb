@@ -27,8 +27,8 @@ import kotlinx.coroutines.launch
 class HomeFragment : Fragment(), OnMovieSelectedListener {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var viewModel: HomeViewModel
-    private lateinit var carouselAdapter: CarouselAdapter
-    private lateinit var genreAdapter: GenreAdapter
+    private val carouselAdapter = CarouselAdapter()
+    private val genreAdapter = GenreAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +53,7 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
             viewModel.navigation.collect(::handleNavigation)
         }
 
-        carouselAdapter = CarouselAdapter(this)
+        carouselAdapter.setListener(this)
         binding.carouselViewPager.apply {
             adapter = carouselAdapter
             orientation = ViewPager2.ORIENTATION_HORIZONTAL
@@ -61,7 +61,7 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
 
         TabLayoutMediator(binding.carouselIndicator, binding.carouselViewPager) { _, _ -> }.attach()
 
-        genreAdapter = GenreAdapter(this)
+        genreAdapter.setListener(this)
         genreAdapter.setHasStableIds(true)
         binding.genreList.apply {
             adapter = genreAdapter

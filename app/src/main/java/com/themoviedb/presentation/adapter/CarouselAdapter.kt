@@ -13,10 +13,16 @@ import com.themoviedb.presentation.model.MovieDiffCallback
 import com.themoviedb.presentation.model.MovieUIItem
 import com.themoviedb.presentation.view.OnMovieSelectedListener
 
-class CarouselAdapter(private val listener: OnMovieSelectedListener) :
+class CarouselAdapter :
     ListAdapter<MovieUIItem, CarouselAdapter.CarouselViewHolder>(
         MovieDiffCallback()
     ) {
+    private var listener: OnMovieSelectedListener? = null
+
+    fun setListener(listener: OnMovieSelectedListener?) {
+        this.listener = listener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarouselViewHolder {
         val binding =
             ItemCarouselBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -39,7 +45,7 @@ class CarouselAdapter(private val listener: OnMovieSelectedListener) :
                 .into(binding.movieImage)
 
             binding.root.setOnClickListener {
-                item.id?.let { listener.onMovieSelected(it) }
+                item.id?.let { listener?.onMovieSelected(it) }
             }
         }
     }

@@ -13,8 +13,14 @@ import com.themoviedb.presentation.model.MovieDiffCallback
 import com.themoviedb.presentation.model.MovieUIItem
 import com.themoviedb.presentation.view.OnMovieSelectedListener
 
-class HorizontalMovieAdapter(private val listener: OnMovieSelectedListener) :
+class HorizontalMovieAdapter :
     ListAdapter<MovieUIItem, HorizontalMovieAdapter.MovieViewHolder>(MovieDiffCallback()) {
+
+    private var listener: OnMovieSelectedListener? = null
+
+    fun setListener(listener: OnMovieSelectedListener?) {
+        this.listener = listener
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val binding = ItemMovieUiBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -38,7 +44,7 @@ class HorizontalMovieAdapter(private val listener: OnMovieSelectedListener) :
                 .into(binding.movieImage)
 
             binding.root.setOnClickListener {
-                item.id?.let { listener.onMovieSelected(it) }
+                item.id?.let { listener?.onMovieSelected(it) }
             }
         }
     }

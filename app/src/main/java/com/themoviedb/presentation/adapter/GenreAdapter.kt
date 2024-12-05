@@ -7,9 +7,14 @@ import com.themoviedb.databinding.ItemGenreSectionBinding
 import com.themoviedb.presentation.model.MovieUIItem
 import com.themoviedb.presentation.view.OnMovieSelectedListener
 
-class GenreAdapter(private val listener: OnMovieSelectedListener) : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
+class GenreAdapter : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
 
     private var data: Map<String, List<MovieUIItem>> = emptyMap()
+    private var listener: OnMovieSelectedListener? = null
+
+    fun setListener(listener: OnMovieSelectedListener?) {
+        this.listener = listener
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenreViewHolder {
         val binding =
@@ -35,7 +40,8 @@ class GenreAdapter(private val listener: OnMovieSelectedListener) : RecyclerView
 
         fun bind(genre: String, movies: List<MovieUIItem>) {
             binding.genreTitle.text = genre
-            val movieAdapter = HorizontalMovieAdapter(listener)
+            val movieAdapter = HorizontalMovieAdapter()
+            movieAdapter.setListener(listener)
             binding.moviesList.adapter = movieAdapter
             movieAdapter.submitList(movies)
         }
