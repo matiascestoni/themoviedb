@@ -23,7 +23,10 @@ class MovieDetailViewModel @Inject constructor(
     private val _navigation = MutableStateFlow<MovieDetailNavigation?>(null)
     val navigation: StateFlow<MovieDetailNavigation?> = _navigation
 
-    fun init(movieId: String) = viewModelScope.launch {
+    private var isTablet: Boolean = false
+
+    fun init(movieId: String, isTablet: Boolean) = viewModelScope.launch {
+        this@MovieDetailViewModel.isTablet = isTablet
         when (val response = repository.fetchMovieDetails(movieId.toInt())) {
             is Response.Error -> _uiState.value = MovieDetailUIState.Error(response.message)
             is Response.Success -> {
@@ -41,7 +44,11 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun onBackPressed() {
-        _navigation.value = MovieDetailNavigation.ToMHome
+        if (isTablet) {
+            _uiState.value = MovieDetailUIState.GoBack
+        } else {
+            _navigation.value = MovieDetailNavigation.ToMHome
+        }
     }
 
     fun onNavigationHandled() = viewModelScope.launch {

@@ -22,7 +22,8 @@
 
         <argument
             android:name="movieId"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="null"/>
     </fragment>
 
     <action

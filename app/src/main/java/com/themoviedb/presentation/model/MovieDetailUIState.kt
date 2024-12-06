@@ -7,4 +7,5 @@ sealed class MovieDetailUIState {
     data class Error(val errorMessage: String) : MovieDetailUIState()
     data class Success(val movieDetail: MovieDetail) : MovieDetailUIState()
     data object IsOffline : MovieDetailUIState()
+    data object GoBack : MovieDetailUIState()
 }

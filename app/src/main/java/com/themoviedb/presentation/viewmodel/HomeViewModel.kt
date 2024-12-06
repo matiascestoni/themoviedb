@@ -28,16 +28,22 @@ class HomeViewModel @Inject constructor(
     val navigation: StateFlow<HomeNavigation?> = _navigation
 
     private var currentPage = 3
+    private var isTablet: Boolean = false
 
     fun onMovieSelected(movieId: Int) {
-        _navigation.value = HomeNavigation.ToMovieDetail(movieId)
+        if (isTablet) {
+            _uiState.value = HomeUIState.ShowMovieDetail(movieId)
+        } else {
+            _navigation.value = HomeNavigation.ToMovieDetail(movieId)
+        }
     }
 
     fun onNavigationHandled() = viewModelScope.launch {
         _navigation.value = null
     }
 
-    fun init() = viewModelScope.launch {
+    fun init(isTablet: Boolean) = viewModelScope.launch {
+        this@HomeViewModel.isTablet = isTablet
         when (val response = repository.fetchPopularMovies()) {
             is Response.Error -> _uiState.value = HomeUIState.Error(response.message)
             is Response.Success -> {

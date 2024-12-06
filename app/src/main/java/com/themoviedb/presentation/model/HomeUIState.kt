@@ -8,4 +8,5 @@ sealed class HomeUIState {
         val moviesByGenreMap: Map<String, List<MovieUIItem>>
     ) : HomeUIState()
     data object IsOffline : HomeUIState()
+    data class ShowMovieDetail(val movieId: Int) : HomeUIState()
 }

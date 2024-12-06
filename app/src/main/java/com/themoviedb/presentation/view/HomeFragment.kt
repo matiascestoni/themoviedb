@@ -41,7 +41,8 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
-        viewModel.init()
+        val isTablet = resources.getBoolean(R.bool.isTablet)
+        viewModel.init(isTablet)
         buildUI()
     }
 
@@ -83,7 +84,17 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
             }
 
             HomeUIState.IsOffline -> showOfflineMessage()
+            is HomeUIState.ShowMovieDetail -> showMovieDetail(uiState.movieId)
         }
+    }
+
+    private fun showMovieDetail(movieId: Int) {
+        val fragment = MovieDetailFragment().apply {
+            arguments = Bundle().apply { putInt("movieId", movieId) }
+        }
+        childFragmentManager.beginTransaction()
+            .replace(R.id.detailContainer, fragment)
+            .commit()
     }
 
     private fun handleNavigation(navigation: HomeNavigation?) {
@@ -91,7 +102,7 @@ class HomeFragment : Fragment(), OnMovieSelectedListener {
             null -> {}
             is HomeNavigation.ToMovieDetail -> navigateToMovieDetail(navigation.movieId)
         }
-       viewModel.onNavigationHandled()
+        viewModel.onNavigationHandled()
     }
 
     private fun showOfflineMessage() {

@@ -41,7 +41,13 @@ class MovieDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[MovieDetailViewModel::class.java]
-        viewModel.init(args.movieId)
+        val isTablet = resources.getBoolean(R.bool.isTablet)
+        val movieId = if (arguments?.getInt("movieId") != null && isTablet) {
+            arguments?.getInt("movieId")
+        } else {
+            args.movieId
+        }
+        viewModel.init(isTablet = isTablet, movieId = movieId.toString())
         buildUI()
     }
 
@@ -64,6 +70,15 @@ class MovieDetailFragment : Fragment() {
             MovieDetailUIState.IsOffline -> showOfflineMessage()
             MovieDetailUIState.Loading -> showLoading()
             is MovieDetailUIState.Success -> handleSuccess(uiState.movieDetail)
+            MovieDetailUIState.GoBack -> goBack()
+        }
+    }
+
+    private fun goBack() {
+        if (childFragmentManager.backStackEntryCount > 0) {
+            childFragmentManager.popBackStack()
+        } else {
+            findNavController().navigateUp()
         }
     }
 
